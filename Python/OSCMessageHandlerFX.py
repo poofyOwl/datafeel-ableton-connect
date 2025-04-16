@@ -11,4 +11,7 @@ from OSCMessageHandlerBase import OSCMessageHandlerBase
 class OSCMessageHandlerFX(OSCMessageHandlerBase):
 
     def handle_osc_message(address, *args):
-        pass
+        print(f"Received OSC Message: {args}")
+
+        if args[0] == '/pan':
+            pass
