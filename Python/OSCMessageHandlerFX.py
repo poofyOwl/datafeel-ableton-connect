@@ -12,18 +12,27 @@ class OSCMessageHandlerFX(OSCMessageHandlerBase):
 
     def __init__(self, devices):
         super().__init__(devices)
+        devices[0].registers.set_vibration_mode(VibrationMode.MANUAL)
+        devices[1].registers.set_vibration_mode(VibrationMode.MANUAL)
+        devices[2].registers.set_vibration_mode(VibrationMode.MANUAL)
+        devices[3].registers.set_vibration_mode(VibrationMode.MANUAL)
+        devices[0].registers.set_vibration_frequency(400)
+        devices[1].registers.set_vibration_frequency(400)
+        devices[2].registers.set_vibration_frequency(400)
+        devices[3].registers.set_vibration_frequency(400)
 
         # TODO need to figure out how to get the track's volume if it is not sent to us over OSC
         self._intensity_volume_multiplier = 0.85 # for now init to 0.85 (0.0 dB in Ableton)
 
     def handle_osc_message(self, address, *args):
         print(f"Received OSC Message: {args}")
+        print(address)
 
-        if args[0] == '/pan':
-            self._handle_pan(args[1])
+        if address == '/pan':
+            self._handle_pan(args[0])
         
-        elif args[0] == '/volume':
-            self._handle_volume(args[1])
+        elif address == '/volume':
+            self._handle_volume(args[0])
 
     def _handle_pan(self, pan_value):
         '''
@@ -36,6 +45,7 @@ class OSCMessageHandlerFX(OSCMessageHandlerBase):
         Left dots are devices 0 and 1, right dots are devices 2 and 3.
         Add volume multiplier!
         '''
+        print("panning")
         self.devices[0].registers.set_vibration_intensity((1.0 - pan_value)*self._intensity_volume_multiplier)
         self.devices[1].registers.set_vibration_intensity((1.0 - pan_value)*self._intensity_volume_multiplier)
         self.devices[2].registers.set_vibration_intensity(pan_value*self._intensity_volume_multiplier)
@@ -47,6 +57,7 @@ class OSCMessageHandlerFX(OSCMessageHandlerBase):
         Ableton OSC volume goes from 0.0 at -infinity to 1.0 at +6 dB. At 0.0 dB it’s 0.85
         Set the intensity multiplier of all the dots to the volume value received
         '''
+        print("voluming")
         # set multiplier
         self._intensity_volume_multiplier = volume_value
         
