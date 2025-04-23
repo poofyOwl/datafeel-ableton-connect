@@ -1,11 +1,7 @@
-from pythonosc import dispatcher, osc_server
-import asyncio
-import sys
-from time import sleep
-from datafeel.device import VibrationMode, discover_devices, LedMode, ThermalMode
+from datafeel.device import VibrationMode
 
 from utils import *
-from OSCMessageHandlerBase import OSCMessageHandlerBase
+from OSCMessageHandlerBase import *
 
 
 class OSCMessageHandlerFX(OSCMessageHandlerBase):
@@ -45,7 +41,7 @@ class OSCMessageHandlerFX(OSCMessageHandlerBase):
         Left dots are devices 0 and 1, right dots are devices 2 and 3.
         Add volume multiplier!
         '''
-        print("panning")
+        # print("panning")
         self.devices[0].registers.set_vibration_intensity((1.0 - pan_value)*self._intensity_volume_multiplier)
         self.devices[1].registers.set_vibration_intensity((1.0 - pan_value)*self._intensity_volume_multiplier)
         self.devices[2].registers.set_vibration_intensity(pan_value*self._intensity_volume_multiplier)
@@ -57,7 +53,7 @@ class OSCMessageHandlerFX(OSCMessageHandlerBase):
         Ableton OSC volume goes from 0.0 at -infinity to 1.0 at +6 dB. At 0.0 dB it’s 0.85
         Set the intensity multiplier of all the dots to the volume value received
         '''
-        print("voluming")
+        # print("voluming")
         # set multiplier
         self._intensity_volume_multiplier = volume_value
         
