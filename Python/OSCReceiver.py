@@ -16,41 +16,47 @@ if not devices:
     sys.exit(1)
 
 async def run_osc_server():
-    # MIDI Instrument Handlers
-    osc_msg_handler_kick = OSCMessageHandlerMIDIInstrument(devices, InstrDotMap.KICK)
-    osc_msg_handler_snare = OSCMessageHandlerMIDIInstrument(devices, InstrDotMap.SNARE)
-    osc_msg_handler_bass = OSCMessageHandlerMIDIInstrument(devices, InstrDotMap.BASS)
-
-    # FX handler
-    osc_msg_handler_fx = OSCMessageHandlerFX(devices)
-
-    disp = dispatcher.Dispatcher()
-    disp.map("/Velocity*", osc_msg_handler_kick.handle_osc_message)
-    disp.map("/Note*", osc_msg_handler_kick.handle_osc_message)
-    disp.map("/Velocity*", osc_msg_handler_snare.handle_osc_message)
-    disp.map("/Note*", osc_msg_handler_snare.handle_osc_message)
-    disp.map("/Velocity*", osc_msg_handler_bass.handle_osc_message)
-    disp.map("/Note*", osc_msg_handler_bass.handle_osc_message)
-    disp.map("/pan", osc_msg_handler_fx.handle_osc_message)
-    disp.map("/volume", osc_msg_handler_fx.handle_osc_message)
-
+    # Old MIDI handler
     # server = osc_server.AsyncIOOSCUDPServer(("0.0.0.0", OSC_PORT_MIDI), disp, asyncio.get_event_loop())
     # transport, protocol = await server.create_serve_endpoint()
     # print(f"Listening for OSC messages on port {OSC_PORT_MIDI}...")
 
-    server = osc_server.AsyncIOOSCUDPServer(("0.0.0.0", OSC_PORT_MIDI_KICK), disp, asyncio.get_event_loop())
-    transport, protocol = await server.create_serve_endpoint()
+    # MIDI Kick Handler
+    osc_msg_handler_kick = OSCMessageHandlerMIDIInstrument(devices, InstrDotMap.KICK)
+    disp_kick = dispatcher.Dispatcher()
+    disp_kick.map("/Note*", osc_msg_handler_kick.handle_osc_message)
+    disp_kick.map("/Velocity*", osc_msg_handler_kick.handle_osc_message)
+    server_kick = osc_server.AsyncIOOSCUDPServer(("0.0.0.0", OSC_PORT_MIDI_KICK), disp_kick, asyncio.get_event_loop())
+    transport, protocol = await server_kick.create_serve_endpoint()
     print(f"Listening for OSC messages on port {OSC_PORT_MIDI_KICK}...")
-    server = osc_server.AsyncIOOSCUDPServer(("0.0.0.0", OSC_PORT_MIDI_SNARE), disp, asyncio.get_event_loop())
-    transport, protocol = await server.create_serve_endpoint()
+
+    # MIDI Snare Handler
+    osc_msg_handler_snare = OSCMessageHandlerMIDIInstrument(devices, InstrDotMap.SNARE)
+    disp_snare = dispatcher.Dispatcher()
+    disp_snare.map("/Note*", osc_msg_handler_snare.handle_osc_message)
+    disp_snare.map("/Velocity*", osc_msg_handler_snare.handle_osc_message)
+    server_snare = osc_server.AsyncIOOSCUDPServer(("0.0.0.0", OSC_PORT_MIDI_SNARE), disp_snare, asyncio.get_event_loop())
+    transport, protocol = await server_snare.create_serve_endpoint()
     print(f"Listening for OSC messages on port {OSC_PORT_MIDI_SNARE}...")
-    server = osc_server.AsyncIOOSCUDPServer(("0.0.0.0", OSC_PORT_MIDI_BASS), disp, asyncio.get_event_loop())
-    transport, protocol = await server.create_serve_endpoint()
+
+    # MIDI Bass Handler
+    osc_msg_handler_bass = OSCMessageHandlerMIDIInstrument(devices, InstrDotMap.BASS)
+    disp_bass = dispatcher.Dispatcher()
+    disp_bass.map("/Note*", osc_msg_handler_bass.handle_osc_message)
+    disp_bass.map("/Velocity*", osc_msg_handler_bass.handle_osc_message)
+    server_bass = osc_server.AsyncIOOSCUDPServer(("0.0.0.0", OSC_PORT_MIDI_BASS), disp_bass, asyncio.get_event_loop())
+    transport, protocol = await server_bass.create_serve_endpoint()
     print(f"Listening for OSC messages on port {OSC_PORT_MIDI_BASS}...")
-    server = osc_server.AsyncIOOSCUDPServer(("0.0.0.0", OSC_PORT_FX_VIBRATION), disp, asyncio.get_event_loop())
-    transport, protocol = await server.create_serve_endpoint()
+
+    # FX handler
+    osc_msg_handler_fx = OSCMessageHandlerFX(devices)
+    disp_fx = dispatcher.Dispatcher()
+    disp_fx.map("/pan", osc_msg_handler_fx.handle_osc_message)
+    disp_fx.map("/volume", osc_msg_handler_fx.handle_osc_message)
+    server_fx = osc_server.AsyncIOOSCUDPServer(("0.0.0.0", OSC_PORT_FX_VIBRATION), disp_fx, asyncio.get_event_loop())
+    transport, protocol = await server_fx.create_serve_endpoint()
     print(f"Listening for OSC messages on port {OSC_PORT_FX_VIBRATION}...")
-    
+
     try:
         while True:
             await asyncio.sleep(1)
