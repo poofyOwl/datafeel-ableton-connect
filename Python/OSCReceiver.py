@@ -14,23 +14,25 @@ if not devices:
     print("No DataFeel devices found...")
     # sys.exit(1)
 
+devices[0].set_led(*midi_to_rgb(50))
+
 async def run_osc_server():
     # first run the MIDI one
-    # osc_msg_handler_midi = OSCMessageHandlerMIDI(devices)
+    osc_msg_handler_midi = OSCMessageHandlerMIDI(devices)
 
     # FX handler
     osc_msg_handler_fx = OSCMessageHandlerFX(devices)
 
     disp = dispatcher.Dispatcher()
 
-    # disp.map("/Velocity", osc_msg_handler_midi.handle_osc_message)
-    # disp.map("/Note", osc_msg_handler_midi.handle_osc_message)
+    disp.map("/Velocity*", osc_msg_handler_midi.handle_osc_message)
+    disp.map("/Note*", osc_msg_handler_midi.handle_osc_message)
     disp.map("/pan", osc_msg_handler_fx.handle_osc_message)
     disp.map("/volume", osc_msg_handler_fx.handle_osc_message)
 
-    # server = osc_server.AsyncIOOSCUDPServer(("0.0.0.0", OSC_PORT_MIDI), disp, asyncio.get_event_loop())
-    # transport, protocol = await server.create_serve_endpoint()
-    # print(f"Listening for OSC messages on port {OSC_PORT_MIDI}...")
+    server = osc_server.AsyncIOOSCUDPServer(("0.0.0.0", OSC_PORT_MIDI), disp, asyncio.get_event_loop())
+    transport, protocol = await server.create_serve_endpoint()
+    print(f"Listening for OSC messages on port {OSC_PORT_MIDI}...")
 
     server = osc_server.AsyncIOOSCUDPServer(("0.0.0.0", OSC_PORT_VIBRATION), disp, asyncio.get_event_loop())
     transport, protocol = await server.create_serve_endpoint()
